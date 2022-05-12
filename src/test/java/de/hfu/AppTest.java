@@ -14,6 +14,10 @@ import de.hfu.residents.service.BaseResidentService;
 import de.hfu.residents.service.ResidentService;
 import de.hfu.residents.service.ResidentServiceException;
 
+import static org.easymock.EasyMock.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 /**
  * Unit test for simple App.
  */
@@ -103,5 +107,28 @@ public class AppTest
 		}
     }
     
+    @Test
+    public void testResidentWithMock() {
+    	ResidentRepository mock = createMock(ResidentRepository.class);
+    	Vector<Resident> testResident = new Vector<Resident>();
+    	testResident.add(new Resident("David", "Pfau", "Rankweg", "Freudenstadt", new Date()));
+		testResident.add(new Resident("Lukas", "Lokomotivfuehrer", "Lokstrasse", "Insel", new Date()));
+		testResident.add(new Resident("Jim", "Knopf", "Lokstrasse", "Insel", new Date()));
+		
+		expect(mock.getResidents()).andReturn(testResident);
+		
+		replay(mock);
+		
+		BaseResidentService service = new BaseResidentService();
+		service.setResidentRepository(mock);
+		try {
+			assertThat(service.getUniqueResident(new Resident("David", "", "", "", new Date())).getGivenName(), equalTo("David"));
+		} catch (ResidentServiceException e) {
+			e.printStackTrace();
+			assert(false);
+		}
+		
+		
+    }
     
 }
